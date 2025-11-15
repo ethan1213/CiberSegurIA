@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CiberSegurIA{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .dashboard-header {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .dashboard-header h1 {
+        color: #667eea;
+        font-size: 2rem;
+    }
+
+    .dashboard-header p {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+
+    .assessments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .assessment-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .assessment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .assessment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .assessment-id {
+        font-size: 0.85rem;
+        color: #999;
+        font-weight: 600;
+    }
+
+    .assessment-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-completado {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-progreso {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .assessment-score {
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .score-high {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .score-medium {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .score-low {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .assessment-date {
+        text-align: center;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .assessment-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .assessment-actions .btn {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .empty-state h2 {
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1>Bienvenido, {{ user.nombre_empresa }}</h1>
+        <p>Gestiona tus diagnósticos de cumplimiento SGSI</p>
+    </div>
+    <a href="/assessment/new" class="btn btn-success">+ Nuevo Diagnóstico</a>
+</div>
+
+{% if assessments %}
+<div class="card">
+    <h2>Mis Diagnósticos</h2>
+    <div class="assessments-grid">
+        {% for assessment in assessments %}
+        <div class="assessment-card">
+            <div class="assessment-header">
+                <span class="assessment-id">ID: SGSI-{{ "%04d"|format(assessment.id) }}</span>
+                <span class="assessment-status {% if assessment.estado == 'Completado' %}status-completado{% else %}status-progreso{% endif %}">
+                    {{ assessment.estado }}
+                </span>
+            </div>
+
+            {% if assessment.estado == 'Completado' %}
+            <div class="assessment-score">
+                <div class="score-circle {% if assessment.puntaje_final >= 80 %}score-high{% elif assessment.puntaje_final >= 50 %}score-medium{% else %}score-low{% endif %}">
+                    {{ assessment.puntaje_final }}%
+                </div>
+                <div class="assessment-date">
+                    {{ assessment.fecha.strftime('%d/%m/%Y %H:%M') }}
+                </div>
+            </div>
+
+            <div class="assessment-actions">
+                <a href="/assessment/report/{{ assessment.id }}" class="btn">Ver Reporte</a>
+                <a href="/assessment/report/{{ assessment.id }}/download" class="btn btn-success">Descargar PDF</a>
+            </div>
+            {% else %}
+            <div class="assessment-score">
+                <p style="color: #666; text-align: center; margin: 2rem 0;">
+                    Evaluación en progreso...
+                </p>
+                <div class="assessment-date">
+                    Iniciado: {{ assessment.fecha.strftime('%d/%m/%Y %H:%M') }}
+                </div>
+            </div>
+
+            <div class="assessment-actions">
+                <a href="/assessment/{{ assessment.id }}" class="btn">Continuar</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>No tienes diagnósticos aún</h2>
+    <p>Comienza tu primer diagnóstico de cumplimiento SGSI según Ley 21.663</p>
+    <a href="/assessment/new" class="btn btn-success">Iniciar Primer Diagnóstico</a>
+</div>
+{% endif %}
+{% endblock %}

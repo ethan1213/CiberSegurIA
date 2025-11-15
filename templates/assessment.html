@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Cuestionario SGSI - CiberSegurIA{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .assessment-header {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .assessment-header h1 {
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .assessment-header p {
+        color: #666;
+    }
+
+    .progress-bar {
+        background: #e2e8f0;
+        height: 10px;
+        border-radius: 5px;
+        margin-top: 1rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    .domain-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .domain-title {
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #667eea;
+    }
+
+    .question-card {
+        background: #f8fafc;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 5px;
+    }
+
+    .question-text {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+    }
+
+    .question-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+
+    .question-reference {
+        color: #999;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .radio-option {
+        position: relative;
+    }
+
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .radio-option label {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .radio-option input[type="radio"]:checked + label.label-si {
+        background: #10b981;
+        border-color: #10b981;
+    }
+
+    .radio-option input[type="radio"]:checked + label.label-no {
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .radio-option input[type="radio"]:checked + label.label-parcial {
+        background: #f59e0b;
+        border-color: #f59e0b;
+    }
+
+    .radio-option input[type="radio"]:checked + label.label-na {
+        background: #6b7280;
+        border-color: #6b7280;
+    }
+
+    .radio-option label:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+
+    .evidencia-field {
+        margin-top: 1rem;
+    }
+
+    .evidencia-field label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .evidencia-field textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+    }
+
+    .evidencia-field textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .submit-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .submit-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .submit-section p {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .btn-submit {
+        padding: 1rem 3rem;
+        font-size: 1.1rem;
+    }
+
+    .required-indicator {
+        color: #ef4444;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assessment-header">
+    <h1>Cuestionario de Diagnóstico SGSI</h1>
+    <p>Evaluación ID: SGSI-{{ "%04d"|format(assessment.id) }}</p>
+    <p style="margin-top: 0.5rem;">
+        Complete todas las preguntas con la mayor precisión posible. Este diagnóstico tomará aproximadamente 20-30 minutos.
+    </p>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+</div>
+
+<form method="POST" action="/assessment/{{ assessment.id }}/submit" id="assessmentForm">
+    {% for dominio, questions in questions_by_domain.items() %}
+    <div class="domain-section">
+        <h2 class="domain-title">{{ dominio }}</h2>
+
+        {% for question in questions %}
+        <div class="question-card">
+            <div class="question-text">
+                {{ loop.index }}. {{ question.pregunta }} <span class="required-indicator">*</span>
+            </div>
+
+            {% if question.descripcion %}
+            <div class="question-description">
+                {{ question.descripcion }}
+            </div>
+            {% endif %}
+
+            {% if question.referencia_legal %}
+            <div class="question-reference">
+                📋 Referencia: {{ question.referencia_legal }}
+            </div>
+            {% endif %}
+
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio"
+                           id="q{{ question.id }}_si"
+                           name="question_{{ question.id }}"
+                           value="Si"
+                           {% if existing_answers.get(question.id) and existing_answers[question.id]['respuesta'] == 'Si' %}checked{% endif %}
+                           required>
+                    <label for="q{{ question.id }}_si" class="label-si">✓ Sí</label>
+                </div>
+
+                <div class="radio-option">
+                    <input type="radio"
+                           id="q{{ question.id }}_parcial"
+                           name="question_{{ question.id }}"
+                           value="Parcial"
+                           {% if existing_answers.get(question.id) and existing_answers[question.id]['respuesta'] == 'Parcial' %}checked{% endif %}
+                           required>
+                    <label for="q{{ question.id }}_parcial" class="label-parcial">◐ Parcial</label>
+                </div>
+
+                <div class="radio-option">
+                    <input type="radio"
+                           id="q{{ question.id }}_no"
+                           name="question_{{ question.id }}"
+                           value="No"
+                           {% if existing_answers.get(question.id) and existing_answers[question.id]['respuesta'] == 'No' %}checked{% endif %}
+                           required>
+                    <label for="q{{ question.id }}_no" class="label-no">✗ No</label>
+                </div>
+
+                <div class="radio-option">
+                    <input type="radio"
+                           id="q{{ question.id }}_na"
+                           name="question_{{ question.id }}"
+                           value="N/A"
+                           {% if existing_answers.get(question.id) and existing_answers[question.id]['respuesta'] == 'N/A' %}checked{% endif %}
+                           required>
+                    <label for="q{{ question.id }}_na" class="label-na">− N/A</label>
+                </div>
+            </div>
+
+            <div class="evidencia-field">
+                <label for="evidencia_{{ question.id }}">Evidencia/Comentarios (opcional):</label>
+                <textarea id="evidencia_{{ question.id }}"
+                          name="evidencia_{{ question.id }}"
+                          rows="2"
+                          placeholder="Ej: Tenemos la política publicada en intranet desde enero 2024">{{ existing_answers.get(question.id, {}).get('evidencia', '') }}</textarea>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="submit-section">
+        <h3>¿Completaste todas las preguntas?</h3>
+        <p>Revisa tus respuestas antes de enviar. Podrás acceder al reporte completo en PDF una vez finalizado.</p>
+        <button type="submit" class="btn btn-success btn-submit">Generar Reporte de Diagnóstico</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Calcular progreso
+    function updateProgress() {
+        const form = document.getElementById('assessmentForm');
+        const radios = form.querySelectorAll('input[type="radio"]');
+        const questions = new Set();
+        const answered = new Set();
+
+        radios.forEach(radio => {
+            const questionName = radio.name;
+            questions.add(questionName);
+            if (radio.checked) {
+                answered.add(questionName);
+            }
+        });
+
+        const progress = (answered.size / questions.size) * 100;
+        document.getElementById('progress').style.width = progress + '%';
+    }
+
+    // Actualizar progreso al cargar y al cambiar
+    document.addEventListener('DOMContentLoaded', updateProgress);
+    document.getElementById('assessmentForm').addEventListener('change', updateProgress);
+
+    // Smooth scroll al siguiente dominio
+    document.querySelectorAll('.radio-option input').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Auto-scroll suave al siguiente campo (opcional)
+        });
+    });
+</script>
+{% endblock %}

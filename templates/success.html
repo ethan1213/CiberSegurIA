@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnóstico Completado - CiberSegurIA{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .success-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 10px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        font-size: 3rem;
+    }
+
+    .success-title {
+        color: #667eea;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .success-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-display {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+    }
+
+    .score-number {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .score-label {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .score-interpretation {
+        background: #f8fafc;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+        border-radius: 5px;
+    }
+
+    .score-interpretation h3 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .score-interpretation p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .action-buttons .btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    .next-steps {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+        border-radius: 5px;
+    }
+
+    .next-steps h3 {
+        color: #92400e;
+        margin-bottom: 1rem;
+    }
+
+    .next-steps ul {
+        color: #78350f;
+        line-height: 1.8;
+        margin-left: 1.5rem;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+    }
+
+    .cta-section h3 {
+        margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+    }
+
+    .btn-cta {
+        background: white;
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    .btn-cta:hover {
+        background: #f8fafc;
+        color: #5568d3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-icon">✓</div>
+
+        <h1 class="success-title">¡Diagnóstico Completado!</h1>
+        <p class="success-subtitle">
+            Tu evaluación ha sido procesada exitosamente.
+        </p>
+
+        <div class="score-display">
+            <div class="score-number">{{ assessment.puntaje_final }}%</div>
+            <div class="score-label">Puntaje de Cumplimiento SGSI</div>
+        </div>
+
+        {% if assessment.puntaje_final >= 80 %}
+        <div class="score-interpretation" style="border-left-color: #10b981;">
+            <h3 style="color: #065f46;">🎯 Nivel de Cumplimiento: ALTO</h3>
+            <p>
+                ¡Excelente! Su organización demuestra un alto nivel de madurez en seguridad de la información.
+                Está en una posición sólida para cumplir con los requisitos de la Ley 21.663.
+            </p>
+        </div>
+        {% elif assessment.puntaje_final >= 50 %}
+        <div class="score-interpretation" style="border-left-color: #f59e0b;">
+            <h3 style="color: #92400e;">⚠️ Nivel de Cumplimiento: MEDIO</h3>
+            <p>
+                Su organización tiene una base de seguridad establecida, pero presenta brechas significativas
+                que deben ser atendidas para alcanzar el cumplimiento total con la Ley 21.663.
+            </p>
+        </div>
+        {% else %}
+        <div class="score-interpretation" style="border-left-color: #ef4444;">
+            <h3 style="color: #991b1b;">🚨 Nivel de Riesgo: CRÍTICO</h3>
+            <p>
+                Su organización presenta brechas críticas en seguridad de la información que requieren
+                atención inmediata. El riesgo de incumplimiento regulatorio y exposición a incidentes es alto.
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            <a href="/assessment/report/{{ assessment.id }}/download" class="btn btn-success">
+                📥 Descargar Reporte PDF Completo
+            </a>
+            <a href="/dashboard" class="btn btn-secondary">
+                ← Volver al Dashboard
+            </a>
+        </div>
+
+        <div class="next-steps">
+            <h3>📋 Tu Reporte Incluye:</h3>
+            <ul>
+                <li><strong>Resumen Ejecutivo</strong> con visualización de tu puntaje de cumplimiento</li>
+                <li><strong>Análisis de Brechas</strong> con las 10 deficiencias más críticas priorizadas</li>
+                <li><strong>Recomendaciones Personalizadas</strong> basadas en tu nivel de madurez</li>
+                <li><strong>Detalle Completo</strong> de todas las preguntas y respuestas por dominio</li>
+                <li><strong>Referencias Legales</strong> alineadas con la Ley 21.663 e ISO 27001</li>
+            </ul>
+        </div>
+
+        <div class="cta-section">
+            <h3>¿Necesitas Ayuda para Remediar las Brechas?</h3>
+            <p>
+                Nuestro equipo de consultores especializados puede ayudarte a implementar un Sistema de
+                Gestión de Seguridad de la Información completo y alcanzar el cumplimiento total.
+            </p>
+            <a href="mailto:contacto@ciberseguria.cl" class="btn btn-cta">
+                📧 Agendar Consulta Gratuita
+            </a>
+        </div>
+
+        <p style="color: #999; margin-top: 2rem; font-size: 0.9rem;">
+            ID de Reporte: SGSI-{{ "%04d"|format(assessment.id) }} |
+            Fecha: {{ assessment.fecha.strftime('%d/%m/%Y %H:%M') }}
+        </p>
+    </div>
+</div>
+{% endblock %}

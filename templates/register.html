@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Registro - CiberSegurIA{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .register-container {
+        max-width: 550px;
+        margin: 3rem auto;
+    }
+
+    .register-card {
+        background: white;
+        border-radius: 10px;
+        padding: 3rem;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-header h1 {
+        color: #667eea;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-header p {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .error-messages {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #dc2626;
+    }
+
+    .error-messages ul {
+        margin-left: 1.5rem;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #666;
+    }
+
+    .login-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1>Crear Cuenta</h1>
+            <p>Comienza tu diagnóstico SGSI hoy</p>
+        </div>
+
+        {% if errors %}
+        <div class="error-messages">
+            <strong>Errores:</strong>
+            <ul>
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="nombre_empresa">Nombre de la Empresa</label>
+                <input type="text" id="nombre_empresa" name="nombre_empresa" placeholder="Acme Corp SpA" required>
+            </div>
+
+            <div class="form-group">
+                <label for="rut">RUT Empresa</label>
+                <input type="text" id="rut" name="rut" placeholder="12.345.678-9" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email_contacto">Email de Contacto</label>
+                <input type="email" id="email_contacto" name="email_contacto" placeholder="contacto@empresa.cl" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm">Confirmar Contraseña</label>
+                <input type="password" id="password_confirm" name="password_confirm" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-register">Crear Cuenta</button>
+        </form>
+
+        <div class="login-link">
+            ¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
